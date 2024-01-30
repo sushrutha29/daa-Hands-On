@@ -1,0 +1,86 @@
+import timeit
+import matplotlib.pyplot as s
+import random
+import psutil
+import platform
+import os
+
+#insertion sort
+def insertion_sorting(array):
+    for i in range(1, len(array)):
+        key = array[i]
+        j = i - 1
+        while j >= 0 and key < array[j]:
+            array[j + 1] = array[j]
+            j -= 1
+        array[j + 1] = key
+
+#selection sort
+def selection_sorting(array):
+    for i in range(len(array)):
+        min_index = i
+        for j in range(i + 1, len(array)):
+            if array[j] < array[min_index]:
+                min_index = j
+        array[i], array[min_index] = array[min_index], array[i]
+
+#bubble sort
+def bubble_sorting(array):
+    n = len(array)
+    for i in range(n - 1):
+        for j in range(0, n - i - 1):
+            if array[j] > array[j + 1]:
+                array[j], array[j + 1] = array[j + 1], array[j]
+                
+
+def get_system_info():
+    system_info = platform.uname()
+    total_ram = psutil.virtual_memory().total // (1024 ** 3)  
+    cpu_info = platform.processor()
+    storage_info = psutil.disk_usage('/')
+    
+    return system_info, total_ram, cpu_info, storage_info
+             
+
+
+ #run benchmark
+def running_benchmark(sort_func, input_size):
+    array1 = random.sample(range(1, 10000), input_size)
+    time_taken = timeit.timeit(lambda: sort_func(array1.copy()), number=100)
+    return time_taken
+
+def benchmark_algorithms():
+    input_sizes = [5, 10, 20, 50, 100, 200, 500, 1000, 1500, 2000, 2500, 3000]  
+
+    insertion_sort_times = []
+    selection_sort_times = []
+    bubble_sort_times = []
+
+    for size in input_sizes:
+        insertion_sort_times.append(running_benchmark(insertion_sorting, size))
+        selection_sort_times.append(running_benchmark(selection_sorting, size))
+        bubble_sort_times.append(running_benchmark(bubble_sorting, size))
+
+    return input_sizes, insertion_sort_times, selection_sort_times, bubble_sort_times
+
+
+def graph_results(input_sizes, insertion_sort_times, selection_sort_times, bubble_sort_times):
+    s.plot(input_sizes, insertion_sort_times, marker='*', label='Insertion Sort')
+    s.plot(input_sizes, selection_sort_times, marker='*', label='Selection Sort')
+    s.plot(input_sizes, bubble_sort_times, marker='*', label='Bubble Sort')
+    s.xlabel('Input Size')
+    s.ylabel('Time (t)')
+    s.title('Sorting Algorithms(Insertion,Selection,Bubble) Benchmark')
+    s.legend()
+    s.show()
+
+if __name__ == "__main__":
+    system_info, total_ram, cpu_info, storage_info = get_system_info()
+    print("System Information:") #System Information: uname_result(system='Darwin', node='Sushruthas-MacBook-Pro.local', release='22.3.0', version='Darwin Kernel Version 22.3.0: Mon Jan 30 20:39:35 PST 2023; root:xnu-8792.81.3~2/RELEASE_ARM64_T8103', machine='arm64')
+    print(system_info)
+    print(f"Total RAM: {total_ram} MB")      #output: 8 MB
+    print(f"CPU Cores: {cpu_cores}")         #CPU Cores:8
+    print(f"Storage Information: Total: {storage_info.total // (1024 ** 3)} GB, Free: {storage_info.free // (1024 ** 3)} GB") #Storage Information: Total: 228 GB, Free: 149 GB
+    
+    input_sizes, insertion_sort_times, selection_sort_times, bubble_sort_times = benchmark_algorithms()
+    graph_results(input_sizes, insertion_sort_times, selection_sort_times, bubble_sort_times)
